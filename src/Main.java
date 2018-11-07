@@ -4,50 +4,55 @@ import java.util.*;
 
 public class Main {
 
-    public static List<String> trigrames(String mot){
-        List<String> list = new ArrayList<String>();
-
-        String motchevrons = '<'+mot+'>';
-        for (int i=1;i<motchevrons.length()-1;++i){
-            list.add(motchevrons.substring(i-1,i+2));
+    public static List<String> corriger(String mot, DicoTrig dicoTrig){
+        List<String> result = new ArrayList<String>();
+        List<String> trigs = new ArrayList<String>();
+        PriorityQueue<String> motsTrigsCommuns = new PriorityQueue<String>(new TrigCommunComparator(mot));
+        PriorityQueue<String> motsTriesDistance = new PriorityQueue<String>(new DistanceLevenshteinComparator(mot));
+        if(dicoTrig.dico.contains(mot)){
+            result.add(mot);
+            return result;
         }
-        //System.out.println(list);
-        return list;
+        trigs = DicoTrig.trigrames(mot);
+        for(String trig: trigs) {
+            if(!dicoTrig.trigcomm.containsKey(trig))
+                continue;
+            motsTrigsCommuns.addAll(dicoTrig.trigcomm.get(trig));
+        }
+
+        for(int i=0; i<100; ++i){
+            if(motsTrigsCommuns.isEmpty()) break;
+            motsTriesDistance.add(motsTrigsCommuns.poll());
+        }
+
+        while(result.size()!=5){
+            if(motsTriesDistance.isEmpty())
+                break;
+            if(result.contains(motsTriesDistance.peek()))
+                motsTriesDistance.poll();
+            else
+                result.add(motsTriesDistance.poll());
+        }
+        return result;
     }
 
+
     public static void main(String[] args) {
-        String [] deuxmots = {"chien", "schium"};
-        System.out.println(DistanceLevenshtein.distance("honda","hyundai"));
-        trigrames("coucou");
 
-        ArrayList<String> dico = new ArrayList<String>();
-        HashSet<String> trigs = new HashSet<String>();
-        HashMap<String,List<String>> trigcomm = new HashMap<String,List<String>>();
-
+        DicoTrig bob = new DicoTrig();
+        //System.out.println(bob.trigcomm.get("uji"));
+        //System.out.println(DicoTrig.trigrammesCommuns("apiculteur","apication"));
+        //System.out.println(corriger("chienz",bob));
         Scanner sc = null;
         try {
-            sc = new Scanner(new File("dico.txt"));
+            sc = new Scanner(new File("fautes.txt"));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
+
         while (sc.hasNext()) {
-            String str = sc.next();
-            dico.add(str);
-            trigs.addAll(trigrames(str));
+            String mot = sc.next();
+            System.out.println(corriger(mot,bob));
         }
-
-        for(String trig: trigs){
-            List<String> motconttrig = new ArrayList<String>();
-            for(String mot: dico){
-                if(trigrames(mot).contains(trig))
-                    motconttrig.add(mot);
-            }
-            trigcomm.put(trig,motconttrig);
-        }
-
-
-        //dico.put(trigrames("coucou"),"coucou");
-        System.out.println(dico);
-        System.out.println(trigcomm);
     }
 }
