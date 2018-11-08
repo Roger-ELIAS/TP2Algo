@@ -7,23 +7,40 @@ public class Main {
     public static List<String> corriger(String mot, DicoTrig dicoTrig){
         List<String> result = new ArrayList<String>();
         List<String> trigs = new ArrayList<String>();
-        PriorityQueue<String> motsTrigsCommuns = new PriorityQueue<String>(new TrigCommunComparator(mot));
+        List<Set<String>> motsTrigsCommuns = new ArrayList<Set<String>>();
         PriorityQueue<String> motsTriesDistance = new PriorityQueue<String>(new DistanceLevenshteinComparator(mot));
         if(dicoTrig.dico.contains(mot)){
             result.add(mot);
             return result;
         }
         trigs = DicoTrig.trigrames(mot);
+        
+        motsTrigsCommuns.add(new HashSet<String>());
         for(String trig: trigs) {
-            if(!dicoTrig.trigcomm.containsKey(trig))
-                continue;
-            motsTrigsCommuns.addAll(dicoTrig.trigcomm.get(trig));
+        	if(!dicoTrig.trigcomm.containsKey(trig))
+        		continue;
+        	for(String mottrig: dicoTrig.trigcomm.get(trig)){
+        		boolean contenu = false;
+        		for(int i=0; i<motsTrigsCommuns.size();++i){
+        			if(motsTrigsCommuns.get(i).contains(mottrig)){
+        				contenu = true;
+        				motsTrigsCommuns.get(i).remove(mottrig);
+        				if(i+1>=motsTrigsCommuns.size()-1)
+        					motsTrigsCommuns.add(new HashSet<String>());
+        				motsTrigsCommuns.get(i+1).add(mottrig);
+        				break;
+        			}
+        		}
+        		if(!contenu)
+        			motsTrigsCommuns.get(0).add(mottrig);
+        	}
         }
-
-        for(int i=0; i<100; ++i){
-            if(motsTrigsCommuns.isEmpty()) break;
-            motsTriesDistance.add(motsTrigsCommuns.poll());
+        
+        for(int ii=motsTrigsCommuns.size()-1; ii>=0;--ii){
+        	motsTriesDistance.addAll(motsTrigsCommuns.get(ii));
+        	if(motsTriesDistance.size()>100) break;
         }
+        
 
         while(result.size()!=5){
             if(motsTriesDistance.isEmpty())
