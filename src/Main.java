@@ -40,6 +40,7 @@ public class Main {
         	motsTriesDistance.addAll(motsTrigsCommuns.get(ii));
         	if(motsTriesDistance.size()>100) break;
         }
+        //System.out.println(motsTriesDistance.size());
         
 
         while(result.size()!=5){
@@ -66,10 +67,23 @@ public class Main {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-
+        long currentTime = System.nanoTime();
         while (sc.hasNext()) {
             String mot = sc.next();
-            System.out.println(corriger(mot,bob));
+            corriger(mot,bob);
+            //System.out.println(mot+"=>"+corriger(mot,bob));
         }
+        long elapsedTime = System.nanoTime()-currentTime;
+        System.out.println("Temps de correction : "+ (double)(elapsedTime/1000000)+"ms");
+        /*
+        Scanner scanner = new Scanner(System.in);
+        try {
+            while (true) {
+                String line = scanner.nextLine();
+                System.out.println(corriger(line, bob));
+            }
+        } catch(IllegalStateException | NoSuchElementException e) {
+            e.printStackTrace();
+        }*/
     }
 }
